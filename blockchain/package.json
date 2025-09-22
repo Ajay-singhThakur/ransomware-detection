@@ -1,0 +1,12 @@
+{
+  "name": "ransomware-blockchain",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "hardhat": "^2.22.1",
+    "@nomiclabs/hardhat-ethers": "^2.2.2",
+    "ethers": "^6.6.0"
+  }
+}

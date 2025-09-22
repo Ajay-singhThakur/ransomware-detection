@@ -1,0 +1,39 @@
+cat > docker-compose.yml <<'EOF'
+version: "3.8"
+
+services:
+  ganache:
+    image: trufflesuite/ganache:latest
+    container_name: ganache
+    command: ["--deterministic", "--host", "0.0.0.0", "--port", "8545"]
+    ports:
+      - "8545:8545"
+    healthcheck:
+      test: ["CMD-SHELL","curl -sSf http://localhost:8545 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ipfs:
+    image: ipfs/go-ipfs:latest
+    container_name: ipfs
+    volumes:
+      - ./ipfs_data:/data/ipfs
+    ports:
+      - "5001:5001"   # API
+      - "8080:8080"   # Gateway
+
+  backend:
+    build: ./backend
+    container_name: backend
+    depends_on:
+      - ganache
+      - ipfs
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - ./contracts_meta:/app/contracts_meta
+    env_file:
+      - ./backend/.env
+EOF
