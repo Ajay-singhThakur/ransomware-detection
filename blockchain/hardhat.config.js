@@ -1,16 +1,16 @@
-cat > blockchain/hardhat.config.js <<'EOF'
 require("@nomiclabs/hardhat-ethers");
-require("dotenv").config();
 
 module.exports = {
   solidity: "0.8.19",
   networks: {
-    localhost: {
-      url: "http://127.0.0.1:8545"
-    }
+    hardhat: {
+      chainId: 1337,
+    },
   },
   paths: {
-    artifacts: "../contracts_meta"
-  }
+    sources: "./contracts",
+    tests: "./scripts",
+    cache: "./cache",
+    artifacts: "./artifacts"
+  },
 };
-EOF

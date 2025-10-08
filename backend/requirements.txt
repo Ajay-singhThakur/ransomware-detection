@@ -1,11 +1,9 @@
-cat > backend/requirements.txt <<'EOF'
 flask
-gunicorn
-ipfshttpclient==0.8.0
+flask-cors
+requests
+ipfshttpclient
 scikit-learn
 joblib
+numpy
 web3
 python-dotenv
-numpy
-requests
-EOF

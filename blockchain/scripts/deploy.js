@@ -1,26 +1,40 @@
-cat > blockchain/scripts/deploy.js <<'EOF'
-const hre = require("hardhat");
+// scripts/deploy.js
 const fs = require("fs");
 const path = require("path");
 
 async function main() {
-  const FileRegistry = await hre.ethers.getContractFactory("FileRegistry");
-  const registry = await FileRegistry.deploy();
-  await registry.deployed();
-  console.log("FileRegistry deployed to:", registry.address);
+  const RansomwareStorage = await ethers.getContractFactory("RansomwareStorage");
+  console.log("🚀 Deploying RansomwareStorage contract...");
+  const ransomwareStorage = await RansomwareStorage.deploy();
+  await ransomwareStorage.deployed();
 
-  // write ABI & address for backend
-  const outDir = path.resolve(__dirname, '../../contracts_meta');
-  if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+  console.log("✅ Deployed at:", ransomwareStorage.address);
 
-  const abi = registry.interface.format('json');
-  fs.writeFileSync(path.join(outDir, 'FileRegistryABI.json'), JSON.stringify(JSON.parse(abi), null, 2));
-  fs.writeFileSync(path.join(outDir, 'deployed_address.txt'), registry.address);
-  console.log("Saved ABI and address to", outDir);
+  // Get ABI from artifacts
+  const artifactPath = path.join(__dirname, "../artifacts/contracts/RansomwareStorage.sol/RansomwareStorage.json");
+  const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"));
+
+  // Create folder to store ABI and address
+  const outputDir = path.join(__dirname, "../contracts_meta");
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir);
+  }
+
+  // Save ABI and contract address
+  fs.writeFileSync(
+    path.join(outputDir, "RansomwareStorageABI.json"),
+    JSON.stringify(artifact.abi, null, 2)
+  );
+
+  fs.writeFileSync(
+    path.join(outputDir, "deployed_address.txt"),
+    ransomwareStorage.address
+  );
+
+  console.log("📁 ABI and address saved inside /contracts_meta/");
 }
 
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
-EOF

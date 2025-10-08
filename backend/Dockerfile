@@ -1,18 +1,20 @@
-cat > backend/Dockerfile <<'EOF'
+# Use official lightweight Python image
 FROM python:3.10-slim
 
+# Set working directory
 WORKDIR /app
 
-# system deps (small)
-RUN apt-get update && apt-get install -y build-essential && rm -rf /var/lib/apt/lists/*
+# Copy dependency file
+COPY requirements.txt .
 
-COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . /app
-WORKDIR /app
+# Copy all backend files
+COPY . .
 
-EXPOSE 8000
-# Use gunicorn for production-like server (1 worker is fine for demo)
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app", "--workers=1"]
-EOF
+# Expose Flask port
+EXPOSE 5000
+
+# Run the Flask app
+CMD ["python", "app.py"]

@@ -1,37 +1,21 @@
-cat > backend/detector/model_utils.py <<'EOF'
-import os, joblib, numpy as np, math
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "model.joblib")
+import os
+import math
+import numpy as np
 
-def load_model():
-    if os.path.exists(MODEL_PATH):
-        return joblib.load(MODEL_PATH)
-    return None
-
-def file_entropy(path):
-    b = open(path, "rb").read()
-    if not b:
+def calculate_entropy(data: bytes) -> float:
+    if not data:
         return 0.0
-    from collections import Counter
-    freq = Counter(b)
-    probs = [v/len(b) for v in freq.values()]
-    ent = -sum(p * math.log2(p) for p in probs if p>0)
-    return float(ent)
+    counts = [0] * 256
+    for b in data:
+        counts[b] += 1
+    probs = [c / len(data) for c in counts if c > 0]
+    return -sum(p * math.log2(p) for p in probs)
 
-def extract_features(path):
-    size_kb = os.path.getsize(path)/1024.0
-    ent = file_entropy(path)
-    return [ent, size_kb]
-
-def predict_file(path):
-    model = load_model()
-    features = extract_features(path)
-    arr = np.array([features])
-    if model is None:
-        # fallback: simple rule
-        score = 1.0 if features[0] > 6.0 else 0.0
-        pred = int(score)
-        return {"pred": pred, "score": float(score), "entropy": features[0], "size_kb": features[1]}
-    prob = float(model.predict_proba(arr)[0,1])
-    pred = int(model.predict(arr)[0])
-    return {"pred": pred, "score": prob, "entropy": features[0], "size_kb": features[1]}
-EOF
+def extract_features(filepath: str) -> np.ndarray:
+    # read beginning of file for quick static features
+    with open(filepath, "rb") as f:
+        sample = f.read(4096)  # first 4KB
+    entropy = calculate_entropy(sample)
+    size = os.path.getsize(filepath)
+    checksum = sum(sample) % 256 if sample else 0
+    return np.array([size, entropy, checksum], dtype=float)

@@ -1,3 +1,0 @@
-cat > test_safe.txt <<'EOF'
-This is a safe sample file used for testing IPFS upload and scanning.
-EOF
