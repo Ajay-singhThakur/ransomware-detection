@@ -1,23 +1,24 @@
 #!/bin/bash
-# Run from repo root. Requires node + hardhat installed.
-cd blockchain || exit
-npm install
-# run hardhat node in separate terminal first: npx hardhat node
-npx hardhat run scripts/deploy_and_copy.js --network localhost
-echo "ABI and address should be copied to backend/contracts_meta/"
-#!/bin/bash
-echo "🚀 Setting up Ransomware Detection Project..."
 
-# Create backend venv
-cd backend
-python3 -m venv venv
-source venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
-deactivate
-cd ..
+echo "🚀 Starting project setup..."
 
-# Build Docker containers
-docker-compose build
+# Create necessary directories
+echo "Creating directories..."
+mkdir -p backend/model backend/routes backend/utils
+mkdir -p blockchain/contracts blockchain/scripts blockchain/contracts_meta
+mkdir -p frontend/src/components frontend/src/pages frontend/src/assets frontend/src/services
+mkdir -p ipfs_data
 
-echo "✅ Setup complete. Run 'docker-compose up' to start the project."
+# Create placeholder .env files
+echo "Creating .env files..."
+echo "FLASK_DEBUG=1" > backend/.env
+echo "BLOCKCHAIN_RPC_URL=http://blockchain-node:8545" >> backend/.env
+
+echo "VITE_API_BASE_URL=http://localhost:5000" > frontend/.env
+
+# Create empty __init__.py files to make python packages
+touch backend/__init__.py
+touch backend/routes/__init__.py
+touch backend/utils/__init__.py
+
+echo "✅ Setup complete! You can now run 'docker-compose up --build'."

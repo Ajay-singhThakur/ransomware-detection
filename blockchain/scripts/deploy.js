@@ -1,37 +1,36 @@
-// scripts/deploy.js
+const hre = require("hardhat");
 const fs = require("fs");
 const path = require("path");
 
 async function main() {
-  const RansomwareStorage = await ethers.getContractFactory("RansomwareStorage");
-  console.log("🚀 Deploying RansomwareStorage contract...");
-  const ransomwareStorage = await RansomwareStorage.deploy();
-  await ransomwareStorage.deployed();
+  const Contract = await hre.ethers.getContractFactory("RansomwareStorage");
+  const contract = await Contract.deploy();
 
-  console.log("✅ Deployed at:", ransomwareStorage.address);
+  await contract.deployed();
 
-  // Get ABI from artifacts
-  const artifactPath = path.join(__dirname, "../artifacts/contracts/RansomwareStorage.sol/RansomwareStorage.json");
-  const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"));
+  console.log(`RansomwareStorage contract deployed to: ${contract.address}`);
 
-  // Create folder to store ABI and address
-  const outputDir = path.join(__dirname, "../contracts_meta");
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir);
+  // ---- EXPORT ARTIFACTS ----
+  const contractsMetaDir = path.join(__dirname, "..", "contracts_meta");
+
+  if (!fs.existsSync(contractsMetaDir)) {
+    fs.mkdirSync(contractsMetaDir);
   }
 
-  // Save ABI and contract address
+  // 1. Export the contract address
   fs.writeFileSync(
-    path.join(outputDir, "RansomwareStorageABI.json"),
-    JSON.stringify(artifact.abi, null, 2)
+    path.join(contractsMetaDir, "deployed_address.txt"),
+    contract.address
   );
 
+  // 2. Export the contract ABI
+  const contractArtifact = hre.artifacts.readArtifactSync("RansomwareStorage");
   fs.writeFileSync(
-    path.join(outputDir, "deployed_address.txt"),
-    ransomwareStorage.address
+    path.join(contractsMetaDir, "RansomwareStorageABI.json"),
+    JSON.stringify(contractArtifact.abi, null, 2)
   );
 
-  console.log("📁 ABI and address saved inside /contracts_meta/");
+  console.log("✅ Contract address and ABI exported to contracts_meta/");
 }
 
 main().catch((error) => {

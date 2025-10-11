@@ -1,20 +1,22 @@
-# Use official lightweight Python image
-FROM python:3.10-slim
+FROM python:3.9-slim
 
-# Set working directory
+# Set the working directory deep inside the container
 WORKDIR /app
 
-# Copy dependency file
-COPY requirements.txt .
+# Copy only the requirements file first to leverage Docker cache
+COPY ./requirements.txt .
 
-# Install dependencies
+# Install the dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy all backend files
+# Copy the rest of the application code
 COPY . .
 
-# Expose Flask port
+# Set the environment variable to find the Flask app
+ENV FLASK_APP=server.py
+
+# Expose the port
 EXPOSE 5000
 
-# Run the Flask app
-CMD ["python", "app.py"]
+# Define the command to run the application
+CMD ["python3", "-m", "flask", "run", "--host=0.0.0.0"]

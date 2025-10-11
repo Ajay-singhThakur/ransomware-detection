@@ -1,40 +1,17 @@
-version: "3.9"
+version: '3.8'
+
 services:
-  blockchain-node:
-    image: node:18
-    working_dir: /app
-    volumes:
-      - ./blockchain:/app
-    command: >
-      sh -c "npm install --legacy-peer-deps && npx hardhat node"
-    ports:
-      - "8545:8545"   # Hardhat local blockchain
-    stdin_open: true
-    tty: true
-
   backend:
-    build: ./backend
-    ports:
-      - "5000:5000"
     volumes:
-      - ./backend/uploads:/app/uploads
       - ./backend:/app
-    depends_on:
-      - blockchain-node
-      - ipfs
-
+    # This is the corrected command
+    command: python3 -m flask run --host=0.0.0.0 --reload
+  
   frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
-
-  ipfs:
-    image: ipfs/go-ipfs:latest
+    build:
+      context: ./frontend
+      target: build
     volumes:
-      - ./ipfs_data:/data/ipfs
-    ports:
-      - "4001:4001"
-      - "5001:5001"
-      - "8080:8080"
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev
