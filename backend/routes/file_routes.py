@@ -3,8 +3,8 @@ import hashlib
 from flask import Blueprint, request, jsonify
 from werkzeug.utils import secure_filename
 
-# Corrected, explicit imports
-from utils.ipfs_utils import add_to_ipfs
+# Import the functions we need
+from utils.ipfs_utils import add_to_ipfs, list_files_in_mfs
 from utils.ml_utils import predict_ransomware
 from utils.blockchain_utils import log_file_to_blockchain
 
@@ -17,7 +17,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def upload_file():
     if 'file' not in request.files:
         return jsonify({"error": "No file part"}), 400
-
+    
     file = request.files['file']
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
@@ -30,7 +30,7 @@ def upload_file():
         try:
             # 1. Perform ML analysis
             prediction = predict_ransomware(temp_path)
-
+            
             # 2. Upload file to IPFS
             ipfs_cid = add_to_ipfs(temp_path)
             if not ipfs_cid:
@@ -66,5 +66,17 @@ def upload_file():
             if os.path.exists(temp_path):
                 os.remove(temp_path)
             return jsonify({"error": str(e)}), 500
-
+    
     return jsonify({"error": "File upload failed"}), 500
+
+#
+# THIS FUNCTION MUST START WITH NO SPACES BEFORE IT
+#
+@file_bp.route('/files', methods=['GET'])
+def get_file_list():
+    try:
+        files = list_files_in_mfs()
+        # We return the list of file objects directly
+        return jsonify(files), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

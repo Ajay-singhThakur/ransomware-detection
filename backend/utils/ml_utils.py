@@ -15,7 +15,7 @@ def predict_ransomware(file_path):
         return "Safe (mock)"
 
     _, file_extension = os.path.splitext(file_path)
-    dangerous_extensions = ['.exe', '.dll', '.bat', '.scr']
+    dangerous_extensions = ['.exe', '.dll', '.bat', '.scr', '.com']
 
     if file_extension.lower() in dangerous_extensions:
         return "Malicious (mock)"
